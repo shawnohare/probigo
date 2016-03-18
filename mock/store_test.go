@@ -1,4 +1,4 @@
-package mockstore
+package mock
 
 import (
 	"testing"
@@ -32,6 +32,12 @@ func TestGet(t *testing.T) {
 	assert.Error(t, err)
 	_, err = s.get(1)
 	assert.Error(t, err)
+}
+
+func TestDoSet(t *testing.T) {
+	s := New()
+	_, err := s.Do("SET", "key", 1)
+	assert.NoError(t, err)
 }
 
 func TestFset(t *testing.T) {

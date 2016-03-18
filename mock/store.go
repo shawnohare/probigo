@@ -1,6 +1,6 @@
 // Package mockstore provides a mock Store interface for use with testing
 // the probigo package.
-package mockstore
+package mock
 
 import (
 	"errors"
@@ -28,7 +28,7 @@ func asString(arg interface{}) (string, error) {
 	}
 }
 
-func (s Store) get(args ...interface{}) (interface{}, error) {
+func (s *Store) get(args ...interface{}) (interface{}, error) {
 	if len(args) == 0 {
 		return nil, errors.New(ErrInsufficientArgs)
 	}
@@ -39,7 +39,7 @@ func (s Store) get(args ...interface{}) (interface{}, error) {
 	return s.top[key], nil
 }
 
-func (s Store) fget(args ...interface{}) (interface{}, error) {
+func (s *Store) fget(args ...interface{}) (interface{}, error) {
 	if len(args) < 2 {
 		return nil, errors.New(ErrInsufficientArgs)
 	}
@@ -54,7 +54,7 @@ func (s Store) fget(args ...interface{}) (interface{}, error) {
 	return s.structs[key][field], nil
 }
 
-func (s Store) set(args ...interface{}) (interface{}, error) {
+func (s *Store) set(args ...interface{}) (interface{}, error) {
 	if len(args) < 2 {
 		return nil, errors.New(ErrInsufficientArgs)
 	}
@@ -66,7 +66,7 @@ func (s Store) set(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func (s Store) fset(args ...interface{}) (interface{}, error) {
+func (s *Store) fset(args ...interface{}) (interface{}, error) {
 	if len(args) < 3 {
 		return nil, errors.New(ErrInsufficientArgs)
 	}
@@ -85,20 +85,39 @@ func (s Store) fset(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func (s Store) Do(cmd string, args ...interface{}) (interface{}, error) {
+func (s *Store) Do(cmd string, args ...interface{}) (interface{}, error) {
 	// Get commands.
 	switch {
 	case cmd == "GET":
-		return s.get(args)
+		return s.get(args...)
 	case cmd == "HGET" || cmd == "SISMEMBER" || cmd == "ZSCORE":
-		return s.fget(args)
+		return s.fget(args...)
 	case cmd == "SET":
-		return s.get(args)
+		return s.set(args...)
 	case cmd == "HSET" || cmd == "SADD" || cmd == "ZADD":
-		return s.fget(args)
+		return s.fset(args...)
 	default:
 		return nil, fmt.Errorf(ErrBadCmd, cmd)
 	}
+}
+
+// Init clears the mock store and loads some dummy data.
+func (s *Store) Init() {
+	s.top = map[string]interface{}{
+		"key1Int":    1,
+		"key1String": "1",
+		"key1Bytes":  []byte("1"),
+	}
+
+	s.structs = map[string]map[string]interface{}{
+		"hash1": map[string]interface{}{
+			"key1Int":    1,
+			"key1String": "1",
+			"key1Bytes":  []byte("1"),
+			"expired":    1,
+		},
+	}
+
 }
 
 func New() *Store {
