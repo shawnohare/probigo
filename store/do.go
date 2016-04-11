@@ -8,17 +8,17 @@ type Conn interface {
 	Do(cmd string, args ...interface{}) (reply interface{}, err error)
 }
 
-// conn allows users to promote a function to a Conn interface.
+// conn implements the Conn interface using the provided do method.
 type conn struct {
 	do func(string, ...interface{}) (interface{}, error)
 }
 
-// Do invokes the doer's do method.
+// Do invokes the conn instance's do method.
 func (d *conn) Do(cmd string, args ...interface{}) (interface{}, error) {
 	return d.do(cmd, args...)
 }
 
-// NewConn promotes a function to a Conn interface.
+// NewConn promotes a function to a Conn implementation.
 func NewConn(doFunc func(string, ...interface{}) (interface{}, error)) Conn {
 	return &conn{do: doFunc}
 }

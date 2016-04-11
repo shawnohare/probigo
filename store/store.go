@@ -22,7 +22,7 @@ import (
 // 	// HDelete(string, string) error
 // }
 
-// Store represents a data structure store.  It merely wraps the Doer
+// Store represents a data structure store.  It merely wraps the Conn
 // interface it is initialized with to provide some additional type-safe
 // versions of the Do method.
 type Store struct {
